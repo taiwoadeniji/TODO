@@ -1,45 +1,70 @@
-// Retrieve "Active" list.
-var activeList = document.querySelector('ul');
+var activeList = document.querySelector( 'ul' );
+var completedList = document.querySelector( 'ul:last-of-type' );
+var newTask = document.querySelector( '[name="new-task"]' );
+var form = document.querySelector( 'form' );
 
-// Retrieve "Active" list.
-var completedList = document.querySelector('ul:last-of-type');
+form.addEventListener( 'submit', function ( event ) {
+    event.preventDefault();
 
-// Retieve the to-do input.
-var newTask = document.querySelector('[name="new-task"]');
+    var startDateString = formatDateString();
 
-//select our form.
-var form = document.querySelector('form');
-// we listen to our form for a submission.
-form.addEventListener('submit', function (event) {
-// prevent a page-refresh from a REAL form submission.
-event.preventDefault();
+    activeList.innerHTML += `
+        <li>
+            <input type="checkbox">
+            ` + newTask.value + `
+            <time><strong>Start:</strong> ` + startDateString + `</time>
+            <button>Delete</button>
+        </li>
+    `;
 
-activeList.innerHTML += `
-<li>
-<input type="checkbox">
-` + newTask.value + `
-</li>
-`;
+    var newCheckboxes = document.querySelectorAll( 'ul [type="checkbox"]' );
+    for ( var i = 0; i < newCheckboxes.length; i++ ) {
+        var newCheckbox = newCheckboxes[i];
+        var li = newCheckbox.parentNode;
+        var button = li.children[2]; 
 
-//Grab our brand new chekox! (The last LI will always be the newest one!)
-var newCheckboxes = document.querySelectorAll('ul:first-of-type li [type="checkbox"]');
-// Loop through all the checkboxes - make sure they ALL have the event each time we submit!
-for (var i= 0; i< newCheckboxes.length; i++) {
-    var newCheckbox = newCheckboxes[i];
-    // Listen for a clickon this checkbox!
-newCheckbox.addEventListener('click', function (event) {
-    //Grab the associated LI.
-    var li = this.parentNode;
-    // Delete THIS clicked checkbox.
-    li.removeChild( this);
-
-    // Move the LI to our completed UL.
-    completedList.appendChild(li);
-});
+        button.addEventListener( 'click', function (event) {
     
+            var isInActiveList = false;
+            for ( var i = 0; i < activeList.children.length; i++ ) {
+                if ( li === activeList.children[i] ) {
+                    isInActiveList = true; 
+            }
+
+            if ( isInActiveList ) {
+                activeList.removeChild( li );
+            } else {
+                completedList.removeChild( li );
+            }
+        }
+        } );
+
+        newCheckbox.addEventListener( 'click', function ( event ) {
+        
+            li.removeChild( newCheckbox );
+
+            var endTime = document.createElement( 'TIME' );
+            endTime.innerHTML += '<strong>End:</strong> ' + formatDateString();
+
+            li.appendChild( endTime );
+            completedList.appendChild( li );
+        } );
+    }
+} );
+
+function formatDateString () {
+    var date = new Date();
+    var dateString =
+      date.getDate() +
+      '-' +
+      ( Number( date.getMonth() ) + 1 ) + 
+      '-' +
+      date.getFullYear() +
+      ' ' +
+      date.getHours() +
+      ':' +
+      date.getMinutes() +
+      ':' +
+      date.getSeconds();
+    return dateString;
 }
-
-
-});
-
-
